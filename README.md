@@ -19,3 +19,6 @@ cd mongodb_rabbitmq_mysql_pip3_wkhtmltox_nodejs
 docker build -t imagename:1.0 .
 
 ```
+## Run Container and check services
+
+![Screenshot](Working_screenshot.png)
