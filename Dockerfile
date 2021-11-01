@@ -8,25 +8,22 @@ ENV MYSQL_USER=mysql \
     MYSQL_LOG_DIR=/var/log/mysql
 
 COPY requirements.txt requirements.txt
+COPY rabbitmq-server.sh rabbitmq-server.sh
 
 RUN apt-get update \
-  && apt-get install -y software-properties-common redis-server \
+  && apt-get install -y software-properties-common \
   && add-apt-repository universe \
-  && apt-get install -y curl git build-essential python2.7 python-dev libboost-python-dev libjpeg8-dev libjpeg-dev libjpeg-turbo8-dev
-    
-RUN curl -s https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.deb.sh | bash \
   && apt-get update \
-  && apt-get install -y rabbitmq-server
-  
+  && apt-get install -y net-tools redis-server curl git build-essential python2.7 python-dev libboost-python-dev libjpeg8-dev libjpeg-dev libjpeg-turbo8-dev
+    
 RUN apt-get install -y libaio1 libaio-dev libmysqlclient-dev mysql-client mysql-server \
   && apt-get -f install \
   && rm -rf ${MYSQL_DATA_DIR} \
   && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get install libgraphicsmagick++-dev -y \
-  && add-apt-repository 'deb http://archive.ubuntu.com/ubuntu bionic main' \
+RUN add-apt-repository 'deb http://archive.ubuntu.com/ubuntu bionic main' \
   && apt-get update \
-  && apt-get install -y python-mysqldb 
+  && apt-get install libgraphicsmagick++-dev python-mysqldb -y 
 
 RUN apt-get install openssl xorg libssl-dev libcurl4-openssl-dev wget libxml2-dev libxslt1-dev -y
 
@@ -64,6 +61,8 @@ RUN python3.7 -m pip install pip --upgrade pip \
 COPY docker-entrypoint.sh /sbin/entrypoint.sh
 
 RUN chmod 755 /sbin/entrypoint.sh
+RUN chmod +x rabbitmq-server.sh
+RUN bash rabbitmq-server.sh
 
 EXPOSE 3306/tcp
 
