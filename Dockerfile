@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y \
         python3-setuptools
 RUN python3.7 -m pip install pip --upgrade pip \
   && pip install setuptools \
-  && pip install -r requirements.txt \
+  && pip install -r requirements.txt
 
 RUN apt-get update \
   && apt-get install -y software-properties-common redis-server \
