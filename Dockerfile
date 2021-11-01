@@ -9,20 +9,6 @@ ENV MYSQL_USER=mysql \
 
 COPY requirements.txt requirements.txt
 
-RUN apt-get update && apt-get install -y \
-        software-properties-common
-RUN add-apt-repository ppa:deadsnakes/ppa
-RUN apt-get update && apt-get install -y \
-        python3.7 \
-        python3-pip
-RUN python3.7 -m pip install pip
-RUN apt-get update && apt-get install -y \
-        python3-distutils \
-        python3-setuptools
-RUN python3.7 -m pip install pip --upgrade pip \
-  && pip install setuptools \
-  && pip install -r requirements.txt
-
 RUN apt-get update \
   && apt-get install -y software-properties-common redis-server \
   && add-apt-repository universe \
@@ -62,6 +48,20 @@ RUN apt-get install gnupg -y \
   && apt-get update \
   && apt-get install -y mongodb-org
     
+RUN apt-get update && apt-get install -y \
+        software-properties-common
+RUN add-apt-repository ppa:deadsnakes/ppa
+RUN apt-get update && apt-get install -y \
+        python3.7 \
+        python3-pip
+RUN python3.7 -m pip install pip
+RUN apt-get update && apt-get install -y \
+        python3-distutils \
+        python3-setuptools
+RUN python3.7 -m pip install pip --upgrade pip \
+  && pip install setuptools \
+  && pip install -r requirements.txt
+
 COPY docker-entrypoint.sh /sbin/entrypoint.sh
 
 RUN chmod 755 /sbin/entrypoint.sh
