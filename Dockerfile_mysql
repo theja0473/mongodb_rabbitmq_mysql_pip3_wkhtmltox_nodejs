@@ -1,0 +1,29 @@
+FROM ubuntu:latest
+
+ENV DEBIAN_FRONTEND noninteractive
+
+ARG MYSQL_SERVER_PACKAGE=mysql-community-server-minimal-8.0.27
+ARG MYSQL_SHELL_PACKAGE=mysql-shell-8.0.27
+
+RUN apt-get update \
+  && apt-get install gnupg wget tzdata lsb-release -y
+
+RUN wget https://repo.mysql.com/mysql-apt-config_0.8.19-1_all.deb \
+  && dpkg -i mysql-apt-config_0.8.19-1_all.deb
+
+RUN echo "deb http://repo.mysql.com/apt/ubuntu/ bionic mysql-apt-config" > /etc/apt/sources.list.d/mysql.list
+RUN echo "deb http://repo.mysql.com/apt/ubuntu/ bionic mysql-8.0" >> /etc/apt/sources.list.d/mysql.list
+RUN echo "deb http://repo.mysql.com/apt/ubuntu/ bionic mysql-tools" >> /etc/apt/sources.list.d/mysql.list
+RUN echo "deb-src http://repo.mysql.com/apt/ubuntu/ bionic mysql-8.0" >> /etc/apt/sources.list.d/mysql.list
+
+RUN apt update \
+  && apt install mysql-server -y
+
+COPY docker-entrypoint.sh /opt/entrypoint.sh
+
+RUN chmod +x /opt/entrypoint.sh 
+
+ENV MYSQL_UNIX_PORT /var/lib/mysql/mysql.sock
+
+ENTRYPOINT ["/opt/entrypoint.sh"]
+EXPOSE 3306 33060 33061

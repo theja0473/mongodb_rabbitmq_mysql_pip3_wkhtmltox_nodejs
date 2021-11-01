@@ -1,11 +1,22 @@
 FROM ubuntu:latest
 
 ENV DEBIAN_FRONTEND noninteractive
-ENV MYSQL_USER=mysql \
-    MYSQL_VERSION=8.0.20 \
-    MYSQL_DATA_DIR=/var/lib/mysql \
-    MYSQL_RUN_DIR=/run/mysqld \
-    MYSQL_LOG_DIR=/var/log/mysql
+ARG MYSQL_SERVER_PACKAGE=mysql-community-server-minimal-8.0.27
+ARG MYSQL_SHELL_PACKAGE=mysql-shell-8.0.27
+
+RUN apt-get update \
+  && apt-get install gnupg wget tzdata lsb-release -y
+
+RUN wget https://repo.mysql.com/mysql-apt-config_0.8.19-1_all.deb \
+  && dpkg -i mysql-apt-config_0.8.19-1_all.deb
+
+RUN echo "deb http://repo.mysql.com/apt/ubuntu/ bionic mysql-apt-config" > /etc/apt/sources.list.d/mysql.list
+RUN echo "deb http://repo.mysql.com/apt/ubuntu/ bionic mysql-8.0" >> /etc/apt/sources.list.d/mysql.list
+RUN echo "deb http://repo.mysql.com/apt/ubuntu/ bionic mysql-tools" >> /etc/apt/sources.list.d/mysql.list
+RUN echo "deb-src http://repo.mysql.com/apt/ubuntu/ bionic mysql-8.0" >> /etc/apt/sources.list.d/mysql.list
+
+RUN apt update \
+  && apt install mysql-server -y
 
 COPY requirements.txt requirements.txt
 COPY rabbitmq-server.sh rabbitmq-server.sh
@@ -16,7 +27,7 @@ RUN apt-get update \
   && apt-get update \
   && apt-get install -y net-tools redis-server curl git build-essential python2.7 python-dev libboost-python-dev libjpeg8-dev libjpeg-dev libjpeg-turbo8-dev
     
-RUN apt-get install -y libaio1 libaio-dev libmysqlclient-dev mysql-client mysql-server \
+RUN apt-get install -y libaio1 libaio-dev libmysqlclient-dev mysql-client \
   && apt-get -f install \
   && rm -rf ${MYSQL_DATA_DIR} \
   && rm -rf /var/lib/apt/lists/*
@@ -58,15 +69,14 @@ RUN python3.7 -m pip install pip --upgrade pip \
   && pip install setuptools \
   && pip install -r requirements.txt
 
-COPY docker-entrypoint.sh /sbin/entrypoint.sh
-
-RUN chmod 755 /sbin/entrypoint.sh
 RUN chmod +x rabbitmq-server.sh
 RUN bash rabbitmq-server.sh
 
-EXPOSE 3306/tcp
+COPY docker-entrypoint.sh /opt/entrypoint.sh
 
-ENTRYPOINT ["/sbin/entrypoint.sh"]
+RUN chmod +x /opt/entrypoint.sh 
 
-CMD ["/usr/bin/mysqld_safe"]
+ENV MYSQL_UNIX_PORT /var/lib/mysql/mysql.sock
 
+ENTRYPOINT ["/opt/entrypoint.sh"]
+EXPOSE 3306 33060 33061
