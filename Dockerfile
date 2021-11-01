@@ -16,8 +16,7 @@ RUN apt-get update \
     
 RUN curl -s https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.deb.sh | bash \
   && apt-get update \
-  && apt-get install -y rabbitmq-server \
-  && rabbitmq-plugins enable rabbitmq_management
+  && apt-get install -y rabbitmq-server
   
 RUN apt-get install -y libaio1 libaio-dev libmysqlclient-dev mysql-client mysql-server \
   && apt-get -f install \
